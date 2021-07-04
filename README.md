@@ -21,7 +21,7 @@ I use VS-CODE IDE on macOS (ahh the irony :P).
 
 ## **Installing the project**
 
-1. Clone this project to your computer `>git clone https://github.com/DeveloperAlly/solidity-react-truffle-chainlinklottery.git`
+1. Clone this project to your computer `>git clone https://github.com/DeveloperAlly/solidity-react-chainlink-lottery.git`
 2. Install a fresh metamask wallet if you don't have a dev test wallet (ONLY USE A DEV WALLET WITH NO REAL ASSETS IN IT FOR SECURITY) -> <https://blog.wetrust.io/how-to-install-and-use-metamask-7210720ca047>
    - Make sure you save your SEED WORDS
 3. Get some test eth for your metamask wallet (change to rinkeby network and copy your address from MM) <https://faucet.rinkeby.io/>
