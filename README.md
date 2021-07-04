@@ -49,3 +49,6 @@ Truffle: `> truffle test`
 ## On the to-do list:
 
 - Dockerise and Deploy front-end to cloud
+
+
+Sorry about the front end console.logs LOL
