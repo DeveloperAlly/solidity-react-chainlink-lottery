@@ -31,7 +31,7 @@ I use VS-CODE IDE on macOS (ahh the irony :P).
    (alternatively you can use ganache if you're familiar with it)
 7. Create a .env file `>touch .env`
 8. Use the .example file as a template for the .env file and fill out the metamask seed phrase and infura address details
-9. Compile the contracts using >truffle compile (not necessary - but useful to see it runs correctly)
+9. Compile the contracts using `>truffle compile` (not necessary - but useful to see it runs correctly)
 10. Install the node package dependencies `>npm install` (we'll need these on the front-end)
 11. Deploy the contracts to rinkeby `>truffle migrate --network rinkeby` (or ganache is the default command `>truffle migrate --network development`)
 12. Take note of the contract address of the deployed ChainlinkLottery contract and add it to the .env file variable NEXT_PUBLIC_DEPLOYED_CONTRACT_ADDRESS
