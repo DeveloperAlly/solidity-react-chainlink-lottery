@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
+import "semantic-ui-css/semantic.min.css";
 import web3 from "./web3";
 import chainlinkLottery from "./contracts/chainlinkLottery";
+import Layout from "./components/Layout";
 
 function App() {
   // web3.eth.getAccounts().then((res)=>console.log(res))
@@ -117,7 +119,7 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <Layout>
       <h2>Chainlink Lottery Contract</h2>
       <p>This contract is managed by {data.manager}. </p>
       <p>There are currently {data.players.length} people entered.</p>
@@ -139,7 +141,7 @@ function App() {
       <button onClick={pickWinner}>Pick Winner!</button>
       <hr />
       <div>{message}</div>
-    </div>
+    </Layout>
   );
 }
 
