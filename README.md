@@ -14,7 +14,7 @@ I use VS-CODE IDE on macOS (ahh the irony :P).
 
 - To use solidity ^0.6.6
 - To compile with Truffle -> https://www.trufflesuite.com/ (also good quick view here: https://www.programmersought.com/article/41647586799/)
-- To use Chainlink Verifiable Random Numbers
+- To use [Chainlink Verifiable Random Numbers](https://docs.chain.link/docs/chainlink-vrf/)
 - Use React hooks / React functional programming paradigm
 - Use newer version of next (React router library)
 - Incorporate some more error catching on the front-end
