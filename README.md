@@ -29,7 +29,7 @@ I use VS-CODE IDE on macOS (ahh the irony :P).
 5. Install Truffle globally `>npm install -g truffle`
 6. Create an Infura account and project and note your rinkeby api endpoint address -> <https://blog.infura.io/getting-started-with-infura-28e41844cc89/>
    (alternatively you can use ganache if you're familiar with it)
-7. `>cd solidity-react-chainlink-lottery`
+7. Change into repo directory `>cd solidity-react-chainlink-lottery`
 8. Create a .env file `>touch .env`
 9. Use the .example file as a template for the .env file and fill out the metamask seed phrase and infura address details
 10. Compile the contracts using `>truffle compile` (not necessary - but useful to see it runs correctly)
