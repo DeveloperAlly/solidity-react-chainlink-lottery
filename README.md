@@ -10,7 +10,7 @@ Original Lottery Project build off Stephen Griders Udemy course: [Ethereum and S
 
 I use VS-CODE IDE on macOS (ahh the irony :P).
 
-## ** Requirements/Dependencies **
+## **Requirements/Dependencies**
 [Node js](https://nodejs.org/en/)
 
 ## **This project has been updated from the original Stephen Grider version as follows**
