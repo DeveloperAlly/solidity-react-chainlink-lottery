@@ -4,7 +4,7 @@ Original Lottery Project build off Stephen Griders Udemy course: [Ethereum and S
 
 ## **Framework**
 
-**Contracts**: [Truffle](https://www.trufflesuite.com/truffle), Solidity, Infura, Metamask, [Chainlink](https://docs.chain.link/docs) for Verifiable Random Numbers
+**Contracts**: [Truffle](https://www.trufflesuite.com/truffle), Solidity, Infura, [Metamask](https://docs.metamask.io/guide/), [Chainlink](https://docs.chain.link/docs) for Verifiable Random Numbers
 
 **Front-end**: React, [Next](https://nextjs.org/) (routing, SSR), [Semantic](https://react.semantic-ui.com/) (UI styling), [Web3](https://web3js.readthedocs.io/en/v1.3.4/), ganache-cli.
 
