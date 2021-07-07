@@ -3,17 +3,26 @@ import { Menu, Icon } from "semantic-ui-react";
 import { useRouter } from "next/router";
 
 //Hosts the top level layout of our app
-const Header = () => {
+const Header = ({ walletConnected }) => {
   const router = useRouter();
+  console.log("wallet", walletConnected); //not using this prop currently
+  //- though you could implement a button to connect to a wallet here
   return (
     <Menu style={{ marginTop: "1em" }}>
       <Menu.Item onClick={() => router.push("/")}>ChainlinkLottery</Menu.Item>
-      {/* <Menu.Menu position="right">
-        <Menu.Item>Campaigns</Menu.Item>
-        <Menu.Item onClick={() => router.push("/campaigns/new")}>
-          <Icon name="add circle" />
-        </Menu.Item>
-      </Menu.Menu> */}
+      {!walletConnected.connectedStatus ? (
+        <Menu.Menu position="right">
+          <Menu.Item
+            onClick={() => router.push("https://metamask.io/download.html")}
+          >
+            Install Metamask! 🦊
+          </Menu.Item>
+        </Menu.Menu>
+      ) : (
+        <Menu.Menu position="right">
+          <Menu.Item color="blue">Wallet Connected! 😀</Menu.Item>
+        </Menu.Menu>
+      )}
     </Menu>
   );
 };
