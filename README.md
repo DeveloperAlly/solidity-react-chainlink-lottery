@@ -4,11 +4,14 @@ Original Lottery Project build off Stephen Griders Udemy course: [Ethereum and S
 
 ## **Framework**
 
-**Contracts**: Truffle, Solidity, Infura, Metamask, Chainlink for Verifiable Random Numbers
+**Contracts**: [Truffle](https://www.trufflesuite.com/truffle), Solidity, Infura, Metamask, [Chainlink](https://docs.chain.link/docs) for Verifiable Random Numbers
 
-**Front-end**: React, Next (routing), Semantic (UI styling), web3, ganache-cli.
+**Front-end**: React, [Next](https://nextjs.org/) (routing, SSR), [Semantic](https://react.semantic-ui.com/) (UI styling), [Web3](https://web3js.readthedocs.io/en/v1.3.4/), ganache-cli.
 
 I use VS-CODE IDE on macOS (ahh the irony :P).
+
+## ** Requirements/Dependencies **
+[Node js](https://nodejs.org/en/)
 
 ## **This project has been updated from the original Stephen Grider version as follows**
 
@@ -16,13 +19,13 @@ I use VS-CODE IDE on macOS (ahh the irony :P).
 - To compile with Truffle -> https://www.trufflesuite.com/ (also good quick view here: https://www.programmersought.com/article/41647586799/)
 - To use [Chainlink Verifiable Random Numbers](https://docs.chain.link/docs/chainlink-vrf/)
 - Use React hooks / React functional programming paradigm
-- Use newer version of next (React router library)
+- Use newer version of Nextjs (React router library)
 - Incorporate some more error catching on the front-end
 
 ## **Installing the project**
 
 1. Clone this project to your computer `>git clone https://github.com/DeveloperAlly/solidity-react-chainlink-lottery.git`
-2. Install a fresh metamask wallet if you don't have a dev test wallet (ONLY USE A DEV WALLET WITH NO REAL ASSETS IN IT FOR SECURITY) -> <https://blog.wetrust.io/how-to-install-and-use-metamask-7210720ca047>
+2. Install a fresh metamask wallet (or you can use ganache instead) if you don't have a dev test wallet (ONLY USE A DEV WALLET WITH NO REAL ASSETS IN IT FOR SECURITY) -> <https://blog.wetrust.io/how-to-install-and-use-metamask-7210720ca047>
    - Make sure you save your SEED WORDS
 3. Get some test eth for your metamask wallet (change to rinkeby network and copy your address from MM) <https://faucet.rinkeby.io/>
 4. Get some test LINK for your wallet & add the chainlink rinkeby LINK token to metamask (0x01BE23585060835E02B77ef475b0Cc51aA1e0709) https://rinkeby.chain.link/
@@ -42,7 +45,7 @@ I use VS-CODE IDE on macOS (ahh the irony :P).
 
 ## **Testing the project**
 
-Mocha is installed so you can either run the tests with truffle or using node (First run `>npm install` to install dependencies)
+[Mocha](https://mochajs.org/) is installed so you can either run the tests with truffle or using node (First run `>npm install` to install dependencies)
 
 Node: ` > npm run test`.
 Truffle: `> truffle test`
