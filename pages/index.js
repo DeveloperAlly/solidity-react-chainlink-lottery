@@ -4,6 +4,7 @@ import { Form, Input, Button, Message, Icon } from "semantic-ui-react";
 import web3 from "./web3";
 import chainlinkLottery from "./contracts/chainlinkLottery";
 import Layout from "./components/Layout";
+import { useRouter } from "next/router";
 
 /**
  * 1. Check if wallet is installed, connected & on rinkeby network
@@ -22,10 +23,11 @@ import Layout from "./components/Layout";
  */
 const INITIAL_WALLET_CONNECTION = {
   connectedStatus: false,
-  status:
-    "Connect to a wallet like Metamask 🦊 using the button on the top right.",
   address: null,
+  network: null,
 };
+
+const REQUIRED_NETWORK_CHAIN_ID = "0x4"; //Rinkeby network
 
 const INITIAL_TRANSACTION_STATE = {
   loading: "",
@@ -34,6 +36,7 @@ const INITIAL_TRANSACTION_STATE = {
 };
 
 function App(props) {
+  const router = useRouter();
   const [walletConnected, setWalletConnected] = useState(
     INITIAL_WALLET_CONNECTION
   );
@@ -43,26 +46,55 @@ function App(props) {
     balance: "",
   });
   const [entryValue, setEntryValue] = useState("");
-  const [message, setMessage] = useState("");
+  const [walletMessage, setWalletMessage] = useState("");
   const [transactionState, setTransactionState] = useState(
     INITIAL_TRANSACTION_STATE
   );
   const { loading, error, success } = transactionState;
 
+  //Check user has a wallet connected to play
   useEffect(() => {
-    // console.log("eth", window.ethereum);
-    // console.log("web3", web3);
     if (window.ethereum) {
-      setWalletConnected({
-        ...walletConnected,
-        connectedStatus: true,
+      if (ethereum.isConnected()) {
+        setWalletConnected({
+          connectedStatus: true,
+          address: ethereum.selectedAddress,
+          network: ethereum.chainId,
+        });
+        if (ethereum.chainId !== REQUIRED_NETWORK_CHAIN_ID)
+          changeChainRequest();
+      }
+      //metamask functions
+      ethereum.on("accountsChanged", (accounts) => {
+        // console.log("accounts", walletConnected, accounts);
+        setWalletConnected({
+          connectedStatus: true,
+          address: accounts[0],
+        });
+      });
+      ethereum.on("chainChanged", (chainId) => {
+        // console.log("chain", chainlinkLottery);
+        if (chainId !== REQUIRED_NETWORK_CHAIN_ID) {
+          changeChainRequest();
+          setWalletConnected({
+            connectedStatus: true,
+            address: ethereum.selectedAddress,
+            network: chainId,
+          });
+        } else {
+          setWalletMessage(null);
+        }
+      });
+      ethereum.on("disconnect", (err) => {
+        // console.log("wallet disconnected", err);
+        setWalletConnected(INITIAL_WALLET_CONNECTION);
       });
     } else {
       //user needs to connect a wallet to play (still want to display the lottery stats though!)
       setWalletConnected({
         connectedStatus: false,
         status:
-          "To enter - please install an ethereum wallet like Metamask 🦊 into your browser or click the 'Install Metamask' Button in the header menu",
+          "To enter - please install an ethereum wallet like Metamask 🦊. You can also click the 'Install Metamask' Button in the header menu",
         address: null,
       });
     }
@@ -74,20 +106,78 @@ function App(props) {
   }, []);
 
   // SANITY CHECK
-  // useEffect(() => {
-  //   console.log(data);
-  // }, [data]);
+  useEffect(() => {
+    console.log(data, walletConnected);
+  }, [data, walletConnected]);
+
+  const fetchData = async () => {
+    // console.log("fetching contract data", chainlinkLottery);
+    setTransactionState({ ...transactionState, loading: true });
+    await Promise.all([
+      chainlinkLottery.methods.manager().call(),
+      chainlinkLottery.methods.getPlayers().call(),
+      await web3.eth.getBalance(chainlinkLottery.options.address),
+    ])
+      .then((data) => {
+        // console.log("manager, players, balance", data);
+        setData({
+          manager: data[0],
+          players: data[1],
+          balance: data[2],
+        });
+        setTransactionState(INITIAL_TRANSACTION_STATE);
+      })
+      .catch((error) => {
+        // console.log("error", error, data);
+        setTransactionState({
+          ...INITIAL_TRANSACTION_STATE,
+          error: error.message,
+        });
+      });
+  };
+
+  //only tested on metamask
+  const changeChainRequest = async () => {
+    await ethereum
+      .request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: REQUIRED_NETWORK_CHAIN_ID }],
+      })
+      .then(() => {
+        setWalletMessage(null);
+      })
+      .catch((err) => {
+        setWalletMessage(
+          <h3 onClick={changeChainRequest} style={{ marginTop: 0 }}>
+            Incorrect Wallet Network! Change to Rinkeby Network 0x4 to enter
+          </h3>
+        );
+      });
+  };
 
   const onLotteryEnter = async (event) => {
+    setTransactionState(INITIAL_TRANSACTION_STATE);
     event.preventDefault();
     if (entryValue <= 0.01) {
-      setMessage("Minimum entry is > 0.01 ether");
+      setTransactionState({
+        ...INITIAL_TRANSACTION_STATE,
+        error: "Minimum entry is > 0.01 ether",
+      });
       return;
     }
+    await window.ethereum.enable();
+    let chainId = await web3.eth.getChainId(); //depracated in MM
+    if (chainId != REQUIRED_NETWORK_CHAIN_ID) {
+      changeChainRequest();
+    }
+
     await web3.eth
       .getAccounts()
       .then(async (accounts) => {
-        setMessage("Waiting on transaction success...");
+        setTransactionState({
+          ...INITIAL_TRANSACTION_STATE,
+          loading: "Transaction is processing....",
+        });
         await chainlinkLottery.methods
           .enter()
           .send({
@@ -95,29 +185,33 @@ function App(props) {
             value: web3.utils.toWei(entryValue, "ether"),
           })
           .then((res) => {
-            console.log("res", res);
+            // console.log("res", res);
             const etherscanLink = `https://rinkeby.etherscan.io/tx/${res.transactionHash}`;
-            setMessage(
-              <>
-                <p>You have been entered! </p>
-                <p>
-                  See your transaction on etherscan:
-                  <a href={etherscanLink} target="_blank">
-                    {etherscanLink}
-                  </a>
-                </p>
-              </>
-            );
+            setTransactionState({
+              ...INITIAL_TRANSACTION_STATE,
+              success: (
+                <a href={etherscanLink} target="_blank">
+                  View the transaction on Etherscan
+                </a>
+              ),
+            });
+            router.replace(`/`); //this will refresh the lottery stats on the page
             setEntryValue("");
             fetchData();
           })
           .catch((err) => {
-            console.log("error:", err);
-            setMessage(`Error: ${err.message || "unknown error occurred"}`);
+            // console.log("error:", err);
+            setTransactionState({
+              ...INITIAL_TRANSACTION_STATE,
+              error: err.message,
+            });
           });
       })
       .catch((err) => {
-        setMessage(`Error: ${err.message || "Could not fetch accounts"}`);
+        setTransactionState({
+          ...INITIAL_TRANSACTION_STATE,
+          error: `Error: ${err.message || "Could not fetch accounts"}`,
+        });
       });
   };
 
@@ -125,36 +219,48 @@ function App(props) {
     await web3.eth
       .getAccounts()
       .then(async (accounts) => {
-        setMessage("Waiting on transaction success...");
+        setTransactionState({
+          ...INITIAL_TRANSACTION_STATE,
+          loading: "Transaction is processing....",
+        });
         await chainlinkLottery.methods
           .pickWinner()
           .send({
             from: accounts[0],
           })
           .then((res) => {
-            console.log(res);
+            // console.log(res);
             const etherscanLink = `https://rinkeby.etherscan.io/tx/${res.transactionHash}`;
-            setMessage(
-              <>
-                <p>A winner has been picked! </p>
-                <p>Winner: {res.to} </p>
-                <p>
-                  See transaction:
-                  <a href={etherscanLink} target="_blank">
-                    {etherscanLink}
-                  </a>
-                </p>
-              </>
-            );
-            fetchData();
+            setTransactionState({
+              ...INITIAL_TRANSACTION_STATE,
+              success: (
+                <>
+                  <p>A winner has been picked! </p>
+                  <p>Winner: {res.to} </p>
+                  <p>
+                    See transaction:
+                    <a href={etherscanLink} target="_blank">
+                      {etherscanLink}
+                    </a>
+                  </p>
+                </>
+              ),
+            });
+            // fetchData();
           })
           .catch((err) =>
-            setMessage(`Error: ${err.message || "unknown error occurred"}`)
+            setTransactionState({
+              ...INITIAL_TRANSACTION_STATE,
+              error: err.message || "Uknown Error occurred",
+            })
           );
       })
-      .catch((err) => {
-        setMessage(`Error: ${err.message || "Could not fetch accounts"}`);
-      });
+      .catch((err) =>
+        setTransactionState({
+          ...INITIAL_TRANSACTION_STATE,
+          error: `Error: ${err.message || "Could not fetch accounts"}`,
+        })
+      );
   };
 
   const renderAdminFunctions = () => {
@@ -162,7 +268,12 @@ function App(props) {
       <>
         <hr />
         <h4>Time to pick a winner?</h4>
-        <button onClick={pickWinner}>Pick Winner!</button>
+        <button
+          onClick={pickWinner}
+          disabled={ethereum.chainId !== REQUIRED_NETWORK_CHAIN_ID}
+        >
+          Pick Winner!
+        </button>
       </>
     );
   };
@@ -180,13 +291,23 @@ function App(props) {
               onChange={(event) => setEntryValue(event.target.value)}
             />
           </div>
-          <button>Enter</button>
+          <button disabled={ethereum.chainId !== REQUIRED_NETWORK_CHAIN_ID}>
+            Enter
+          </button>
         </form>
       </>
     );
   };
 
-  const isLotteryManager = () => {};
+  const isLotteryManager = () => {
+    if (walletConnected.address && data.manager) {
+      // console.log(walletConnected.address, data.manager);
+      return (
+        walletConnected.address.toLowerCase() === data.manager.toLowerCase()
+      ); //eth addresses are not case sensitive
+    }
+    return false;
+  };
 
   const renderLotteryDetails = () => {
     return (
@@ -202,7 +323,12 @@ function App(props) {
     return (
       <>
         <hr />
-        <Message icon negative={Boolean(error)} success={Boolean(success)}>
+        <Message
+          icon
+          negative={Boolean(error)}
+          success={Boolean(success) && !Boolean(loading)}
+          info={Boolean(loading)}
+        >
           <Icon
             name={
               loading
@@ -214,7 +340,7 @@ function App(props) {
             loading={Boolean(loading)}
           />
           <Message.Content>
-            {Boolean(success) && (
+            {Boolean(success) && !Boolean(loading) && (
               <Message.Header>Transaction Success!</Message.Header>
             )}
             {loading ? loading : error ? error : success}
@@ -229,8 +355,8 @@ function App(props) {
       <h2>Chainlink Lottery Contract</h2>
       <h4>The decentralised, verifiably fair lottery!</h4>
       {data.manager && renderLotteryDetails()}
-      {/* {data.manager && walletConnected.connectedStatus && renderEntryForm()} */}
-      {/* {!isLotteryManager && renderAdminFunctions()} */}
+      {data.manager && walletConnected.connectedStatus && renderEntryForm()}
+      {isLotteryManager() && renderAdminFunctions()}
       {Boolean(loading || error || success) && renderMessage()}
       {!walletConnected.connectedStatus && (
         <>
@@ -242,6 +368,20 @@ function App(props) {
           </Message>
         </>
       )}
+      {Boolean(walletMessage) && (
+        <>
+          <hr />
+          <Message icon info style={{}}>
+            <Icon name="exclamation" />
+            {walletMessage}
+          </Message>
+        </>
+      )}
+      <p style={{ position: "absolute", bottom: "10px" }}>
+        This isn't really a fair lottery - you could enter many many times with
+        the lowest amount and take the jackpot. BUT - the Chainlink random
+        number generator is verifiably random! 😀
+      </p>
     </Layout>
   );
 }
@@ -252,39 +392,11 @@ App.getInitialProps = async () => {
     chainlinkLottery.methods.getPlayers().call(),
     await web3.eth.getBalance(chainlinkLottery.options.address),
   ]);
-  //We should deal with errors - like no gas for contract really.
+  //We should deal with errors - like no gas for contract here really.
+  if (!manager) {
+    router.push("/error");
+  }
   return { manager, players, balance };
 };
 
 export default App;
-
-// Client side function if not using next - this will throw a CORS error on firefox and IE due to the HttpProvider of web3 (see ./web3)
-// const fetchData = async () => {
-//   // console.log("fetching contract data", chainlinkLottery);
-//   setTransactionState({ ...transactionState, loading: true });
-//   await Promise.all([
-//     chainlinkLottery.methods.manager().call(),
-//     chainlinkLottery.methods.getPlayers().call(),
-//     await web3.eth.getBalance(chainlinkLottery.options.address),
-//   ])
-//     .then((data) => {
-//       console.log("manager, players, balance", data);
-//       // setData({
-//       //   manager,
-//       //   players,
-//       //   balance,
-//       // });
-//       setTransactionState({
-//         ...transactionState,
-//         loading: false,
-//       });
-//     })
-//     .catch((error) => {
-//       console.log("error", error, data);
-//       setTransactionState({
-//         ...transactionState,
-//         loading: false,
-//         error: error.message,
-//       });
-//     });
-// };
