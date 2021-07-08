@@ -254,7 +254,7 @@ function App(props) {
                 </>
               ),
             });
-            // fetchData();
+            fetchData();
           })
           .catch((err) =>
             setTransactionState({
