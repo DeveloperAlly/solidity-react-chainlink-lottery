@@ -73,8 +73,13 @@ function App(props) {
         });
       });
       ethereum.on("chainChanged", (chainId) => {
-        // console.log("chain", chainlinkLottery);
+        // console.log("chain", chainId);
         if (chainId !== REQUIRED_NETWORK_CHAIN_ID) {
+          setWalletMessage(
+            <h3 onClick={changeChainRequest} style={{ marginTop: 0 }}>
+              Incorrect Wallet Network! Change to Rinkeby Network 0x4 to enter
+            </h3>
+          );
           changeChainRequest();
           setWalletConnected({
             connectedStatus: true,
@@ -112,7 +117,7 @@ function App(props) {
 
   const fetchData = async () => {
     // console.log("fetching contract data", chainlinkLottery);
-    setTransactionState({ ...transactionState, loading: true });
+    () => setTransactionState({ ...transactionState, loading: true }); //closure hell
     await Promise.all([
       chainlinkLottery.methods.manager().call(),
       chainlinkLottery.methods.getPlayers().call(),
@@ -125,7 +130,8 @@ function App(props) {
           players: data[1],
           balance: data[2],
         });
-        setTransactionState(INITIAL_TRANSACTION_STATE);
+        () =>
+          setTransactionState({ ...transactionState, loading: "", error: "" });
       })
       .catch((error) => {
         // console.log("error", error, data);
@@ -159,10 +165,11 @@ function App(props) {
     setTransactionState(INITIAL_TRANSACTION_STATE);
     event.preventDefault();
     if (entryValue <= 0.01) {
-      setTransactionState({
-        ...INITIAL_TRANSACTION_STATE,
-        error: "Minimum entry is > 0.01 ether",
-      });
+      () =>
+        setTransactionState({
+          ...INITIAL_TRANSACTION_STATE,
+          error: "Minimum entry is > 0.01 ether",
+        });
       return;
     }
     await window.ethereum.enable();
@@ -174,10 +181,11 @@ function App(props) {
     await web3.eth
       .getAccounts()
       .then(async (accounts) => {
-        setTransactionState({
-          ...INITIAL_TRANSACTION_STATE,
-          loading: "Transaction is processing....",
-        });
+        () =>
+          setTransactionState({
+            ...INITIAL_TRANSACTION_STATE,
+            loading: "Transaction is processing....",
+          });
         await chainlinkLottery.methods
           .enter()
           .send({
@@ -195,7 +203,7 @@ function App(props) {
                 </a>
               ),
             });
-            router.replace(`/`); //this will refresh the lottery stats on the page
+            // router.replace(`/`); //this will refresh the lottery stats on the page
             setEntryValue("");
             fetchData();
           })
