@@ -385,9 +385,9 @@ function App(props) {
           </Message>
         </>
       )}
-      <p style={{ position: "absolute", bottom: "10px" }}>
-        This isn't really a fair lottery - you could enter many many times with
-        the lowest amount and take the jackpot. BUT - the Chainlink random
+      <p style={{ position: "relative", bottom: "-50px" }}>
+        NB: This isn't really a fair lottery - you could enter many many times
+        with the lowest amount and take the jackpot. BUT - the Chainlink random
         number generator is verifiably random! 😀
       </p>
     </Layout>
