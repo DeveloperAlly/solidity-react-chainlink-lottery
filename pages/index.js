@@ -68,9 +68,10 @@ function App(props) {
       ethereum.on("accountsChanged", (accounts) => {
         // console.log("accounts", walletConnected, accounts);
         setWalletConnected({
-          connectedStatus: true,
+          ...walletConnected,
           address: accounts[0],
         });
+        setTransactionState(INITIAL_TRANSACTION_STATE);
       });
       ethereum.on("chainChanged", (chainId) => {
         // console.log("chain", chainId);
@@ -82,10 +83,10 @@ function App(props) {
           );
           changeChainRequest();
           setWalletConnected({
-            connectedStatus: true,
-            address: ethereum.selectedAddress,
-            network: chainId,
+            ...walletConnected,
+            network: ethereum.chainId,
           });
+          setTransactionState(INITIAL_TRANSACTION_STATE);
         } else {
           setWalletMessage(null);
         }
@@ -181,11 +182,10 @@ function App(props) {
     await web3.eth
       .getAccounts()
       .then(async (accounts) => {
-        () =>
-          setTransactionState({
-            ...INITIAL_TRANSACTION_STATE,
-            loading: "Transaction is processing....",
-          });
+        setTransactionState({
+          ...INITIAL_TRANSACTION_STATE,
+          loading: "Transaction is processing....",
+        });
         await chainlinkLottery.methods
           .enter()
           .send({

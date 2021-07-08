@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 
 //Hosts the top level layout of our app
 const Header = ({ walletConnected }) => {
+  const router = useRouter(); // probs should just use withRouter()
   return (
     <Menu style={{ marginTop: "1em" }}>
       <Menu.Item onClick={() => router.push("/")}>ChainlinkLottery</Menu.Item>
